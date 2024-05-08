@@ -98,3 +98,24 @@ app.get("/batalha/:id1/:id2", async (req, res) => {
     console.log(err);
   }
 });
+app.get("/heros/batalhas", async (req, res) => {
+  try {
+      // Consulta para obter o histórico de batalhas
+      const historicoResult = await pool.query(`SELECT * FROM batalhas`);
+      const historico = historicoResult.rows;
+
+      // Para cada batalha no histórico, obter os detalhes dos heróis
+      for (let i = 0; i < historico.length; i++) {
+          const batalha = historico[i];
+          const heroiPResult = await pool.query(`SELECT * FROM heros WHERE id = $1`, [batalha.heros_p]);
+          const heroiSResult = await pool.query(`SELECT * FROM heros WHERE id = $1`, [batalha.heros_s]);
+          batalha.heroi_p = heroiPResult.rows[0];
+          batalha.heroi_s = heroiSResult.rows[0];
+      }
+
+      res.json({ historico });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Erro ao obter o histórico de batalhas" });
+  }
+});
