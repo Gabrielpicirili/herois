@@ -80,3 +80,21 @@ app.delete("/:id", async (req, res) => {
     console.log(err);
   }
 });
+app.get("/batalha/:id1/:id2", async (req, res) => {
+  const { id1, id2 } = req.params;
+  const batalha_id = Math.floor(Math.random() * 1000);
+  let winner;
+  try {
+      await pool.query(`INSERT INTO batalhas (id, heros_p, heros_s) VALUES ($1, $2, $3)`, [batalha_id, id1, id2]);
+      const result = await pool.query(`SELECT obter_vencedor_batalha($1) AS winner`, [batalha_id]);
+      winner = result.rows[0].winner;
+
+      // Consulta para obter os dados do vencedor usando o nome do vencedor
+      const winnerDataResult = await pool.query(`SELECT * FROM heros WHERE name = $1`, [winner]);
+      const winnerData = winnerDataResult.rows[0];
+
+      res.json({ message: `Vencedor da batalha foi ${winner}`, winnerData });
+  } catch (err) {
+    console.log(err);
+  }
+});
