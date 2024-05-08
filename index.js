@@ -69,3 +69,14 @@ app.put("/:id", async (req, res) => {
     console.log(err);
   }
 });
+app.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+   await pool.query(`DELETE FROM batalhas WHERE heros_p = $1`, [id]);
+    await pool.query(`DELETE FROM batalhas WHERE heros_s = $1`, [id]);
+    const result = await pool.query(`DELETE FROM heros WHERE id = $1`, [id]);
+    res.json(result.rows);
+  } catch (err) {
+    console.log(err);
+  }
+});
